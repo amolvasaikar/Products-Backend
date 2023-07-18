@@ -137,5 +137,4 @@ namespace MediSearch.Persistence.Repositories
             throw new NotImplementedException();
         }
     }
-
 }
