@@ -1,8 +1,9 @@
 using MediSearch.Persistence.Context;
-using MediSearch.Persistence.IRepositories;
-using MediSearch.Persistence.Repositories;
 using MediSearch.Persistence.SeedDatabase;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace MediSearch.Web
 {
@@ -35,10 +36,29 @@ namespace MediSearch.Web
                 options.UseNpgsql(connectionString));
 
 
-
-            builder.Services.AddScoped<IAccountManager, AccountManager>();
-            builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
             // Add services to the container.
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(o =>
+            {
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+                    ValidAudience = builder.Configuration["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey
+                    (Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"])),
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true
+                };
+            });
+
+            builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

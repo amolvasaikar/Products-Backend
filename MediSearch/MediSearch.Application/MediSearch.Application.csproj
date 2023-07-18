@@ -13,8 +13,10 @@
 
   <ItemGroup>
     <Folder Include="DTOs\" />
+    <Folder Include="Features\Authentication\" />
+    <Folder Include="Features\Roles\" />
+    <Folder Include="Features\Users\" />
     <Folder Include="Interfaces\" />
-    <Folder Include="Features\" />
     <Folder Include="Mapping\" />
     <Folder Include="Validations\" />
   </ItemGroup>

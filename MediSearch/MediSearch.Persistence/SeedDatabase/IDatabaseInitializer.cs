@@ -1,7 +1,6 @@
 ﻿using MediSearch.Domain.Entities;
 using MediSearch.Infrastructure;
 using MediSearch.Persistence.Context;
-using MediSearch.Persistence.IRepositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,12 +15,10 @@ namespace MediSearch.Persistence.SeedDatabase
     public class DatabaseInitializer : IDatabaseInitializer
     {
         readonly ApplicationDbContext _context;
-        readonly IAccountManager _accountManager;
         readonly ILogger _logger;
 
-        public DatabaseInitializer(ApplicationDbContext context, IAccountManager accountManager, ILogger<DatabaseInitializer> logger)
+        public DatabaseInitializer(ApplicationDbContext context, ILogger<DatabaseInitializer> logger)
         {
-            _accountManager = accountManager;
             _context = context;
             _logger = logger;
         }
@@ -53,7 +50,7 @@ namespace MediSearch.Persistence.SeedDatabase
 
         private async Task EnsureRoleAsync(string roleName, string description, string[] claims)
         {
-            if ((await _accountManager.GetRoleByNameAsync(roleName)) == null)
+            if (_context.ApplicationRoles.Where(s => s.Name.ToUpper() == roleName.ToLower()).Count() == 0)
             {
                 _logger.LogInformation($"Generating default role: {roleName}");
 
@@ -67,23 +64,44 @@ namespace MediSearch.Persistence.SeedDatabase
 
 
                 var user = _context.AddAsync(applicationRole);
-                _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
 
         private async Task<ApplicationUser> CreateUserAsync(string userName, string password, string fullName, string email, string phoneNumber, string[] roles)
         {
-            _logger.LogInformation($"Generating default user: {userName}");
-            var hasher = new PasswordHasher<string>();
-            ApplicationUser applicationUser = new ApplicationUser(userName, email, phoneNumber);
-            applicationUser.PasswordHash = hasher.HashPassword(userName, password);
-            applicationUser.FullName = fullName;
+
+            if (_context.ApplicationUsers.Where(s => s.UserName.ToUpper() == userName.ToLower()).Count() == 0)
+            {
+                _logger.LogInformation($"Generating default user: {userName}");
+                var hasher = new PasswordHasher<string>();
+                ApplicationUser applicationUser = new ApplicationUser()
+                {
+                    UserName = userName,
+                    Email = email,
+                    PhoneNumber = phoneNumber,
+                    NormalizedEmail = email.ToUpper(),
+                    NormalizedUserName = userName.ToUpper(),
+                    PasswordHash = hasher.HashPassword(userName, password),
+                    FullName = fullName
+                };
+
+                var user = await _context.AddAsync(applicationUser);
+                await _context.SaveChangesAsync();
 
 
-            var user = _context.AddAsync(applicationUser);
-            _context.SaveChangesAsync();
+                foreach (var item in roles)
+                {
+                    var role = await _context.ApplicationRoles.SingleOrDefaultAsync(s => s.Name == item);
 
-            return applicationUser;
+                    var userrole = new ApplicationUserRole { RoleId = role.Id, UserId = user.Entity.Id };
+                    await _context.AddAsync(userrole);
+                    await _context.SaveChangesAsync();
+                }
+                return applicationUser;
+            }
+            return null;
+
         }
     }
 

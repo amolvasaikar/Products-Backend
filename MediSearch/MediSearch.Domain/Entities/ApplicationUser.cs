@@ -5,14 +5,6 @@ namespace MediSearch.Domain.Entities
 {
     public class ApplicationUser : BaseEntity, IAuditableEntity
     {
-        public ApplicationUser(string username, string emailid, string phonenumber)
-        {
-            UserName = username;
-            Email = emailid;
-            PhoneNumber = phonenumber;
-            NormalizedEmail = emailid.ToUpper();
-            NormalizedUserName = username.ToUpper();
-        }
         public virtual string FriendlyName
         {
             get
@@ -31,9 +23,9 @@ namespace MediSearch.Domain.Entities
         public bool IsEnabled { get; set; }
         public bool IsLockedOut => this.LockoutEnabled && this.LockoutEnd >= DateTimeOffset.UtcNow;
         public string UserName { get; set; }
-        public string NormalizedUserName { get; set; }
+        public string? NormalizedUserName { get; set; }
         public string Email { get; set; }
-        public string NormalizedEmail { get; set; }
+        public string? NormalizedEmail { get; set; }
         public bool EmailConfirmed { get; set; }
         public string PasswordHash { get; set; }
         public string SecurityStamp { get; set; } = Guid.NewGuid().ToString();

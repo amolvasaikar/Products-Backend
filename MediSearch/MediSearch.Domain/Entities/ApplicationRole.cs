@@ -5,6 +5,7 @@ namespace MediSearch.Domain.Entities
 {
     public class ApplicationRole : BaseEntity, IAuditableEntity
     {
+
         public string Name { get; set; }
         public string NormalizedName { get; set; }
         public string? Description { get; set; }
