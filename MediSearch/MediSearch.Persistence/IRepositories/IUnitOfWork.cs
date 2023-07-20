@@ -1,7 +1,18 @@
-﻿namespace MediSearch.Persistence.IRepositories
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace MediSearch.Persistence.IRepositories
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork<out TContext> where TContext : DbContext, new()
     {
-        Task<int> SaveChangesAsync();
+        //The following Property is going to hold the context object
+        TContext Context { get; }
+        //Start the database Transaction
+        void CreateTransaction();
+        //Commit the database Transaction
+        void Commit();
+        //Rollback the database Transaction
+        void Rollback();
+        //DbContext Class SaveChanges method
+        void Save();
     }
 }

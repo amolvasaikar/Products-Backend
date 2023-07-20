@@ -1,10 +1,32 @@
-﻿using MediSearch.Persistence.IRepositories;
+﻿using MediSearch.Persistence.Context;
+using MediSearch.Persistence.IRepositories;
 using System.Linq.Expressions;
 
 namespace MediSearch.Persistence.Repositories
 {
     public abstract class Repository<T> : IGenericRepository<T> where T : class
     {
+
+        private string _errorMessage = string.Empty;
+        private bool _isDisposed;
+        //While Creating an Instance of GenericRepository, we need to pass the UnitOfWork instance
+        //That UnitOfWork instance contains the Context Object that our GenericRepository is going to use
+        public Repository(IUnitOfWork<ApplicationDbContext> unitOfWork)
+            : this(unitOfWork.Context)
+        {
+        }
+        //If you don't want to use Unit of Work, then use the following Constructor 
+        //which takes the context Object as a parameter
+        public Repository(ApplicationDbContext context)
+        {
+            //Initialize _isDisposed to false and then set the Context Object
+            _isDisposed = false;
+            Context = context;
+        }
+        //The following Property is going to return the Context Object
+        public ApplicationDbContext Context { get; set; }
+
+        //The following Property is going to set and return the Entity
         public IQueryable<T> Queryable => throw new NotImplementedException();
 
         public void Add(T item)
