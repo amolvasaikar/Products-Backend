@@ -1,8 +1,11 @@
 using MediSearch.Persistence.Context;
+using MediSearch.Persistence.IRepositories;
+using MediSearch.Persistence.Repositories;
 using MediSearch.Persistence.SeedDatabase;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Reflection;
 using System.Text;
 
 namespace MediSearch.Web
@@ -24,7 +27,10 @@ namespace MediSearch.Web
 
         static void AddServices(WebApplicationBuilder builder)
         {
-
+            builder.Services.AddMediatR(config =>
+            {
+                config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            });
             var Configuration = builder.Configuration;
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                             throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -58,8 +64,12 @@ namespace MediSearch.Web
                 };
             });
 
-            builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
 
+
+            builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
+            builder.Services.AddScoped<IAccountManager, AccountManager>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
