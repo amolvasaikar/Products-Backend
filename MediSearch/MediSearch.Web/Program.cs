@@ -1,10 +1,10 @@
+using MediSearch.Infrastructure;
 using MediSearch.Persistence.Context;
-using MediSearch.Persistence.IRepositories;
-using MediSearch.Persistence.Repositories;
 using MediSearch.Persistence.SeedDatabase;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Reflection;
 using System.Text;
 
@@ -14,19 +14,34 @@ namespace MediSearch.Web
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
-            AddServices(builder);// Add services to the container.
+            try
+            {
+                var builder = WebApplication.CreateBuilder(args);
+                AddServices(builder);// Add services to the container.
 
-            var app = builder.Build();
-            ConfigureRequestPipeline(app); // Configure the HTTP request pipeline.
+                var app = builder.Build();
+                ConfigureRequestPipeline(app); // Configure the HTTP request pipeline.
 
-            SeedDatabase(app); //Seed initial database
+                SeedDatabase(app); //Seed initial database
 
-            app.Run();
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
         }
 
         static void AddServices(WebApplicationBuilder builder)
         {
+            var logger = new LoggerConfiguration()
+                    .ReadFrom.Configuration(builder.Configuration)
+                    .Enrich.FromLogContext()
+                    .CreateLogger();
+            builder.Logging.ClearProviders();
+            builder.Logging.AddSerilog(logger);
+
             builder.Services.AddMediatR(config =>
             {
                 config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
@@ -34,8 +49,6 @@ namespace MediSearch.Web
             var Configuration = builder.Configuration;
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                             throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-            // var authServerUrl = builder.Configuration["AuthServerUrl"].TrimEnd('/');
 
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -67,9 +80,9 @@ namespace MediSearch.Web
 
 
             builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
-            builder.Services.AddScoped<IAccountManager, AccountManager>();
-            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
-            builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
+            //builder.Services.AddScoped<IAccountManager, AccountManager>();
+            //builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
+            //builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -90,6 +103,8 @@ namespace MediSearch.Web
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            //app.UseSerilogRequestLogging();
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
@@ -109,7 +124,7 @@ namespace MediSearch.Web
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    //logger.LogCritical(LoggingEvents.INIT_DATABASE, ex, LoggingEvents.INIT_DATABASE.Name);
+                    logger.LogError("Enable to seed databse");
                     throw ex;
                 }
             }
