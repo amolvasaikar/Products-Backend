@@ -1,5 +1,7 @@
 using MediSearch.Infrastructure;
 using MediSearch.Persistence.Context;
+using MediSearch.Persistence.IRepositories;
+using MediSearch.Persistence.Repositories;
 using MediSearch.Persistence.SeedDatabase;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -80,7 +82,8 @@ namespace MediSearch.Web
 
 
             builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
-            //builder.Services.AddScoped<IAccountManager, AccountManager>();
+            builder.Services.AddScoped<IAccountManager, AccountManager>();
+            //builder.Services.AddSingleton<IHttpContextAccessor, IHttpContextAccessor>();
             //builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
             //builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
             builder.Services.AddControllers();
