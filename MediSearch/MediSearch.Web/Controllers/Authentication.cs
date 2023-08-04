@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using MediSearch.Application.Features.Authentication;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MediSearch.Web.Controllers
 {
@@ -6,30 +8,26 @@ namespace MediSearch.Web.Controllers
     [Route("[controller]")]
     public class Authentication : ControllerBase
     {
-
-
-        private static readonly string[] Summaries = new[]
-        {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public Authentication(ILogger<WeatherForecastController> logger)
+        readonly IMediator _mediator;
+        readonly ILogger<Authentication> _logger;
+        public Authentication(IMediator mediator, ILogger<Authentication> logger)
         {
             _logger = logger;
+            _mediator = mediator;
         }
 
-        [HttpGet(Name = "Login")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpPost]
+        public async Task<ActionResult> Login(AuthRequest request)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            var responce = await _mediator.Send(request);
+            if (responce == null)
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                return BadRequest("Enter valid username or password");
+            }
+            return Ok(responce.Token);
         }
+
+
+
     }
 }

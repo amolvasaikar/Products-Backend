@@ -1,3 +1,4 @@
+using MediSearch.Application;
 using MediSearch.Infrastructure;
 using MediSearch.Persistence.Context;
 using MediSearch.Persistence.IRepositories;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using System.Reflection;
 using System.Text;
 
 namespace MediSearch.Web
@@ -44,10 +44,7 @@ namespace MediSearch.Web
             builder.Logging.ClearProviders();
             builder.Logging.AddSerilog(logger);
 
-            builder.Services.AddMediatR(config =>
-            {
-                config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-            });
+
             var Configuration = builder.Configuration;
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                             throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -55,6 +52,7 @@ namespace MediSearch.Web
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString));
+
 
 
             // Add services to the container.
@@ -79,13 +77,14 @@ namespace MediSearch.Web
                 };
             });
 
-
+            builder.Services.AddApplicationServices();
 
             builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
             builder.Services.AddScoped<IAccountManager, AccountManager>();
+
             //builder.Services.AddSingleton<IHttpContextAccessor, IHttpContextAccessor>();
-            //builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(Repository<>));
-            //builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
+            //builder.Services.AddSingleton(typeof(IGenericRepository<>), typeof(GenericRepository<ApplicationDbContext>));
+            //builder.Services.AddSingleton(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

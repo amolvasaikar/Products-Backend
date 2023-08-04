@@ -5,21 +5,22 @@ using System.Linq.Expressions;
 
 namespace MediSearch.Persistence.Repositories
 {
-    public abstract class Repository<T> : IGenericRepository<T> where T : class
+    public abstract class GenericRepository<T> : IGenericRepository<T> where T : class
     {
 
         private string _errorMessage = string.Empty;
         private bool _isDisposed;
         private DbSet<T> _entities;
+
         //While Creating an Instance of GenericRepository, we need to pass the UnitOfWork instance
         //That UnitOfWork instance contains the Context Object that our GenericRepository is going to use
-        public Repository(IUnitOfWork<ApplicationDbContext> unitOfWork)
+        public GenericRepository(IUnitOfWork<ApplicationDbContext> unitOfWork)
             : this(unitOfWork.Context)
         {
         }
         //If you don't want to use Unit of Work, then use the following Constructor 
         //which takes the context Object as a parameter
-        public Repository(ApplicationDbContext context)
+        public GenericRepository(ApplicationDbContext context)
         {
             //Initialize _isDisposed to false and then set the Context Object
             _isDisposed = false;
@@ -38,107 +39,111 @@ namespace MediSearch.Persistence.Repositories
 
         public void Add(T item)
         {
-            throw new NotImplementedException();
+            _entities.Add(item);
         }
 
-        public Task AddAsync(T item)
+        public async Task AddAsync(T item)
         {
-            throw new NotImplementedException();
+            await _entities.AddAsync(item);
         }
 
         public void AddRange(IEnumerable<T> items)
         {
-            throw new NotImplementedException();
+            _entities.AddRange(items);
         }
 
-        public Task AddRangeAsync(IEnumerable<T> items)
+        public async Task AddRangeAsync(IEnumerable<T> items)
         {
-            throw new NotImplementedException();
+            await _entities.AddRangeAsync(items);
         }
 
         public bool Any()
         {
-            throw new NotImplementedException();
+            return _entities.Any();
         }
 
         public bool Any(Expression<Func<T, bool>> where)
         {
-            throw new NotImplementedException();
+            return _entities.Any(where);
         }
 
-        public Task<bool> AnyAsync()
+        public async Task<bool> AnyAsync()
         {
-            throw new NotImplementedException();
+            return await _entities.AnyAsync();
         }
 
-        public Task<bool> AnyAsync(Expression<Func<T, bool>> where)
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> where)
         {
-            throw new NotImplementedException();
+            return await _entities.AnyAsync(where);
         }
 
         public long Count()
         {
-            throw new NotImplementedException();
+            return Entities.Count();
         }
 
         public long Count(Expression<Func<T, bool>> where)
         {
-            throw new NotImplementedException();
+            return Entities.Count(where);
         }
 
-        public Task<long> CountAsync()
+        public async Task<long> CountAsync()
         {
-            throw new NotImplementedException();
+            return await Entities.CountAsync();
         }
 
-        public Task<long> CountAsync(Expression<Func<T, bool>> where)
+        public async Task<long> CountAsync(Expression<Func<T, bool>> where)
         {
-            throw new NotImplementedException();
+            return await Entities.CountAsync(where);
         }
 
         public void Delete(object key)
         {
-            throw new NotImplementedException();
+            T existing = Entities.Find(key);
+            Entities.Remove(existing);
         }
 
         public void Delete(Expression<Func<T, bool>> where)
         {
-            throw new NotImplementedException();
+            T existing = Entities.Find(where);
+            Entities.Remove(existing);
         }
 
-        public Task DeleteAsync(object key)
+        public async Task DeleteAsync(object key)
         {
-            throw new NotImplementedException();
+            T existing = await Entities.FindAsync(key);
+            Entities.Remove(existing);
         }
 
-        public Task DeleteAsync(Expression<Func<T, bool>> where)
+        public async Task DeleteAsync(Expression<Func<T, bool>> where)
         {
-            throw new NotImplementedException();
+            T existing = await Entities.FindAsync(where);
+            Entities.Remove(existing);
         }
 
         public T Get(object key)
         {
-            throw new NotImplementedException();
+            return Entities.Find(key);
         }
 
-        public Task<T> GetAsync(object key)
+        public async Task<T> GetAsync(object key)
         {
-            throw new NotImplementedException();
+            return await Entities.FindAsync(key);
         }
 
         public IEnumerable<T> List()
         {
-            throw new NotImplementedException();
+            return Entities.ToList();
         }
 
-        public Task<IEnumerable<T>> ListAsync()
+        public async Task<IEnumerable<T>> ListAsync()
         {
-            throw new NotImplementedException();
+            return await Entities.ToListAsync();
         }
 
         public void Update(T item)
         {
-            throw new NotImplementedException();
+            Entities.Update(item);
         }
 
         public Task UpdateAsync(T item)
@@ -148,7 +153,8 @@ namespace MediSearch.Persistence.Repositories
 
         public void UpdatePartial(object item)
         {
-            throw new NotImplementedException();
+            T existing = Entities.Find(item);
+            Entities.Update(existing);
         }
 
         public Task UpdatePartialAsync(object item)
@@ -158,7 +164,7 @@ namespace MediSearch.Persistence.Repositories
 
         public void UpdateRange(IEnumerable<T> items)
         {
-            throw new NotImplementedException();
+            Entities.UpdateRange(items);
         }
 
         public Task UpdateRangeAsync(IEnumerable<T> items)

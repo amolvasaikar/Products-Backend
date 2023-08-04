@@ -2,6 +2,7 @@
 using MediatR;
 using MediSearch.Persistence.IRepositories;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace MediSearch.Application.Features.Authentication
 {
@@ -29,11 +30,13 @@ namespace MediSearch.Application.Features.Authentication
     public class AuthHandler : IRequestHandler<AuthRequest, AuthResponse>
     {
         readonly IAccountManager _accountManager;
-        readonly PasswordHasher<string> password;
-        public AuthHandler(IAccountManager accountManager, PasswordHasher<string> password)
+        readonly PasswordHasher<string> _password;
+        readonly ILogger<AuthHandler> _logger;
+        public AuthHandler(IAccountManager accountManager, ILogger<AuthHandler> logger)
 
         {
-            this.password = password;
+            this._logger = logger;
+            this._password = new PasswordHasher<string>();
             this._accountManager = accountManager;
         }
 
@@ -47,7 +50,6 @@ namespace MediSearch.Application.Features.Authentication
 
 
             return new AuthResponse { };
-            throw new NotImplementedException();
         }
     }
 }

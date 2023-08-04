@@ -12,8 +12,6 @@ namespace MediSearch.Persistence.Repositories
             ApplicationDbContext context)
         {
             _context = context;
-
-
         }
         public async Task<ApplicationUser> GetUserByIdAsync(long userId)
         {
@@ -23,7 +21,7 @@ namespace MediSearch.Persistence.Repositories
 
         public async Task<ApplicationUser> GetUserByUserNameAsync(string userName)
         {
-            return await _context.ApplicationUsers.SingleOrDefaultAsync(s => s.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
+            return await _context.ApplicationUsers.SingleOrDefaultAsync(s => s.UserName == userName);
         }
 
         public async Task<ApplicationUser> GetUserByEmailAsync(string email)
