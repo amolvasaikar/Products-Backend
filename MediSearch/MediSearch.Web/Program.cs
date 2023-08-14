@@ -23,14 +23,11 @@ namespace MediSearch.Web
 
                 var app = builder.Build();
                 ConfigureRequestPipeline(app); // Configure the HTTP request pipeline.
-
                 SeedDatabase(app); //Seed initial database
-
                 app.Run();
             }
             catch (Exception ex)
             {
-
                 throw ex;
             }
         }
@@ -50,11 +47,7 @@ namespace MediSearch.Web
                             throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(connectionString));
-
-
-
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
             // Add services to the container.
 
             builder.Services.AddAuthentication(options =>
@@ -78,7 +71,6 @@ namespace MediSearch.Web
             });
 
             builder.Services.AddApplicationServices();
-
             builder.Services.AddTransient<IDatabaseInitializer, DatabaseInitializer>();
             builder.Services.AddScoped<IAccountManager, AccountManager>();
 
@@ -91,6 +83,7 @@ namespace MediSearch.Web
             builder.Services.AddSwaggerGen();
 
         }
+
         static void ConfigureRequestPipeline(WebApplication app)
         {
             using (var serviceScope = app.Services.GetService<IServiceScopeFactory>().CreateScope())

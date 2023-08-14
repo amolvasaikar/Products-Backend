@@ -8,11 +8,12 @@ namespace MediSearch.Persistence.Repositories
     public class AccountManager : IAccountManager
     {
         private readonly ApplicationDbContext _context;
-        public AccountManager(
-            ApplicationDbContext context)
+
+        public AccountManager(ApplicationDbContext context)
         {
             _context = context;
         }
+
         public async Task<ApplicationUser> GetUserByIdAsync(long userId)
         {
             return await _context.ApplicationUsers.SingleOrDefaultAsync(s => s.Id == userId);
@@ -48,7 +49,6 @@ namespace MediSearch.Persistence.Repositories
                 .ToListAsync();
         }
 
-
         public async Task<(ApplicationUser User, string[] Roles)?> GetUserAndRolesAsync(long userId)
         {
             var user = await _context.ApplicationUsers
@@ -68,7 +68,6 @@ namespace MediSearch.Persistence.Repositories
 
             return (user, roles);
         }
-
 
         public async Task<List<(ApplicationUser User, string[] Roles)>> GetUsersAndRolesAsync(int page, int pageSize)
         {
@@ -94,7 +93,6 @@ namespace MediSearch.Persistence.Repositories
                 .Select(u => (u, roles.Where(r => u.Roles.Select(ur => ur.RoleId).Contains(r.Id)).Select(r => r.Name).ToArray()))
                 .ToList();
         }
-
 
         public async Task<bool> CreateUserAsync(ApplicationUser user, IEnumerable<string> userroles, string password)
         {
@@ -130,12 +128,10 @@ namespace MediSearch.Persistence.Repositories
             return true;
         }
 
-
         public async Task<bool> UpdateUserAsync(ApplicationUser user)
         {
             return await UpdateUserAsync(user, null);
         }
-
 
         public async Task<bool> UpdateUserAsync(ApplicationUser user, IEnumerable<string> roles)
         {
@@ -181,7 +177,6 @@ namespace MediSearch.Persistence.Repositories
             return true;
         }
 
-
         public async Task<bool> ResetPasswordAsync(ApplicationUser user, string newPassword)
         {
             var result = _context.Update(user);
@@ -215,7 +210,6 @@ namespace MediSearch.Persistence.Repositories
             return true;
         }
 
-
         public async Task<bool> DeleteUserAsync(ApplicationUser user)
         {
             _context.Remove(user);
@@ -229,12 +223,10 @@ namespace MediSearch.Persistence.Repositories
 
         }
 
-
         public async Task<ApplicationRole> GetRoleByNameAsync(string roleName)
         {
             return await _context.ApplicationRoles.SingleOrDefaultAsync(u => u.Name == roleName);
         }
-
 
         public async Task<ApplicationRole> GetRoleLoadRelatedAsync(string roleName)
         {
@@ -246,6 +238,7 @@ namespace MediSearch.Persistence.Repositories
 
             return role;
         }
+
         public async Task<List<ApplicationRole>> GetRolesLoadRelatedAsync(int page, int pageSize)
         {
             IQueryable<ApplicationRole> rolesQuery = _context.ApplicationRoles
@@ -335,6 +328,7 @@ namespace MediSearch.Persistence.Repositories
 
             return true;
         }
+
         public async Task<bool> DeleteRoleAsync(string roleName)
         {
             var role = await _context.ApplicationRoles.SingleOrDefaultAsync(u => u.Name == roleName);
@@ -342,6 +336,7 @@ namespace MediSearch.Persistence.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
         public async Task<bool> DeleteRoleAsync(ApplicationRole role)
         {
             _context.Remove(role);

@@ -27,7 +27,5 @@ namespace MediSearch.Web.Controllers
             return Ok(responce.Token);
         }
 
-
-
     }
 }

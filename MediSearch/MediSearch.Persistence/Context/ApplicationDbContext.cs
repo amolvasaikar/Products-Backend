@@ -22,15 +22,16 @@ namespace MediSearch.Persistence.Context
 
         public DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }
 
-
         public ApplicationDbContext()
         {
 
         }
+
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
 
         }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -43,6 +44,7 @@ namespace MediSearch.Persistence.Context
                 optionsBuilder.UseNpgsql(connectionString);
             }
         }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
@@ -54,13 +56,11 @@ namespace MediSearch.Persistence.Context
             return base.SaveChanges();
         }
 
-
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
             UpdateAuditEntities();
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
-
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -68,13 +68,11 @@ namespace MediSearch.Persistence.Context
             return base.SaveChangesAsync(cancellationToken);
         }
 
-
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
         {
             UpdateAuditEntities();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
-
 
         private void UpdateAuditEntities()
         {
