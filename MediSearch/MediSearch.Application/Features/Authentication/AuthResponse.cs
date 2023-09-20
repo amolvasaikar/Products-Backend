@@ -47,6 +47,14 @@ namespace MediSearch.Application.Features.Authentication
             if (applicationuser == null)
                 return null;
 
+            var result = _password.VerifyHashedPassword(applicationuser.UserName, applicationuser.PasswordHash, request.Password);
+            if (PasswordVerificationResult.Success != result)
+            {
+                return null;
+            }
+
+
+
 
 
             return new AuthResponse { };
